@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Sugar Bag Road Mountain Bike Trails | Admin Login</title>
+    <!-- MDB icon -->
+    <link rel="icon" href="../../static/img/slogo.png" type="image/x-icon" />
+    <!-- Font Awesome -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <!-- Google Fonts Roboto -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap"
+    />
+    <!-- MDB -->
+    <link rel="stylesheet" href="../../static/css/mdb.min.css" />
+  </head>
+  <body>
+    <!-- Start your project here-->
+    <div class="container">
+      <div class="d-flex justify-content-center align-items-center" style="height: 100vh">
+        <div class="text-center">
+          <img
+            class="mb-4"
+            src="../../static/img/slogo.png"
+            style="width: 230; height: 150px;"
+          />
+          <h2 class="mt-5">Staff Login</h2>
+          <form method="POST" action="{{ url_for('admin_login') }}">
+            {{ form.hidden_tag() }}
+            <!-- Email input -->
+            <div data-mdb-input-init class="form-outline mb-4">
+              {{ form.email(class="form-control") }}
+              {{ form.email.label(class="form-label") }}
+             
+            </div>
+          
+            <!-- Password input -->
+            <div data-mdb-input-init class="form-outline mb-4">
+              {{ form.password(class="form-control") }}
+              {{ form.password.label(class="form-label") }}
+              
+            </div>
+             <!-- 2 column grid layout for inline styling -->
+             <div class="row mb-4">
+          
+              <div class="col">
+                <!-- Simple link -->
+                <a href="{{ url_for('forgot_password') }}">Forgot password?</a>
+              </div>
+            </div>
+          
+            <!-- Submit button -->
+            {{ form.submit(class="btn btn-primary btn-block mb-4") }}
+          
+            
+          </form>
+        </div>
+      </div>
+    </div>
+    <!-- End your project here-->
+
+    <!-- MDB -->
+    <script type="text/javascript" src="../static/js/mdb.umd.min.js"></script>
+    <!-- Custom scripts -->
+    <script type="text/javascript"></script>
+  </body>
+</html>

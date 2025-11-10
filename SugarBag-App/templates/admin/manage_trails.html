@@ -1,0 +1,52 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Manage Trails{% endblock %}
+
+{% block content %}
+<h1>Manage Trails for Maintenance</h1>
+<hr>
+
+<h3>Red Trails (Due for Maintenance)</h3>
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Trail Name</th>
+                <th>Difficulty</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trail in red_trails %}
+            <tr onclick="window.location.href='{{ url_for('assign_maintenance', trail_id=trail.id) }}'" style="cursor: pointer;">
+                <td>{{ trail.name }}</td>
+                <td>{{ trail.difficulty }}</td>
+                <td>Click to assign maintenance</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<h3>Yellow Trails (Moderate Condition)</h3>
+<div class="table-responsive">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Trail Name</th>
+                <th>Difficulty</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trail in yellow_trails %}
+            <tr onclick="window.location.href='{{ url_for('assign_maintenance', trail_id=trail.id) }}';" style="cursor: pointer;">
+                <td>{{ trail.name }}</td>
+                <td>{{ trail.difficulty }}</td>
+                <td>Click to assign maintenance</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

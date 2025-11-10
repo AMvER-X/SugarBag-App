@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Assign Maintenance{% endblock %}
+
+{% block content %}
+<h1>Assign Maintenance for {{ trail.name }}</h1>
+<hr>
+
+<form action="{{ url_for('assign_maintenance', trail_id=trail.id) }}" method="post">
+    <div class="form-group">
+        <label for="day">Day</label>
+        <input type="number" name="day" id="day" class="form-control" min="1" max="31" required value="{{ request.form.day }}">
+    </div>
+
+    <div class="form-group">
+        <label for="start_time">Start Time</label>
+        <input type="time" name="start_time" id="start_time" class="form-control" required value="{{ request.form.start_time }}">
+    </div>
+
+    <div class="form-group">
+        <label for="end_time">End Time</label>
+        <input type="time" name="end_time" id="end_time" class="form-control" required value="{{ request.form.end_time }}">
+    </div>
+
+    <button type="submit" class="btn btn-primary mb-3">Check Availability</button>
+
+    {% if available_volunteers %}
+        <div class="form-group mt-3">
+            <label for="volunteer_id">Select Volunteer</label>
+            <select name="volunteer_id" id="volunteer_id" class="form-control" required>
+                <option value="">-- Select Volunteer --</option>
+                {% for volunteer in available_volunteers %}
+                    <option value="{{ volunteer.email }}" {% if request.form.volunteer_id == volunteer.email %} selected {% endif %}>{{ volunteer.email }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" name="assign_maintenance" class="btn btn-success mt-2">Assign Maintenance</button>
+    {% endif %}
+
+    {% if trail.assignments and trail.status != 'green' %}
+        <button type="submit" name="complete_maintenance" class="btn btn-danger mt-2">Complete Maintenance</button>
+    {% endif %}
+</form>
+
+<a href="{{ url_for('manage_trails') }}" class="btn btn-secondary mt-3">Back to Manage Trails</a>
+
+{% endblock %}

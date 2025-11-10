@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta http-equiv="x-ua-compatible" content="ie=edge" />
+  <title>Sugar Bag Road Mountain Bike Trails | Challenge</title>
+  <link rel="icon" href="../../static/img/slogo.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" />
+  <link rel="stylesheet" href="../../static/css/mdb.min.css" />
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.css" rel="stylesheet">
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    #map {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 70%; /* Map takes 70% of the width */
+    }
+
+    #challenge-box {
+      position: absolute;
+      top: 20%;
+      right: 20px;
+      background-color: rgba(255, 255, 255, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    #challenge-box h2 {
+      margin-top: 0;
+    }
+
+    @media (max-width: 768px) {
+      #map {
+        width: 100%;
+        height: 60vh;
+      }
+
+      #challenge-box {
+        position: relative;
+        top: 10px;
+        right: 10px;
+        width: 100%;
+        max-width: 300px;
+      }
+    }
+
+    /* Navbar Fix */
+    .navbar-nav {
+      margin-left: auto;
+    }
+
+    /* Logout Button Style */
+    .logout-btn {
+      background-color: #dc3545;
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .logout-btn:hover {
+      background-color: #c82333;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar or Header Section -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">Your Website</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ml-auto">
+        <!-- Other navigation links -->
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('customer_dashboard') }}">Dashboard</a>
+        </li>
+
+        <!-- Logout Button -->
+        <li class="nav-item">
+          <form action="{{ url_for('logout') }}">
+            <button type="submit" class="logout-btn">Logout</button>
+          </form>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div id="map"></div>
+  <div id="challenge-box">
+    <h2>Ready for a challenge?</h2>
+    
+    <form id="challenge-form" method="POST" action="{{ url_for('customer_dashboard') }}">
+      <input type="hidden" name="answer" value="True">
+      <button type="submit" class="btn btn-primary" onclick="startChallenge(event)">Accept Challenge</button>
+    </form>
+    <p id="current-points">Points: {{ current_user.current_points }}</p>
+   {% if TrailName == '' %}
+       <p id="current-points">Please Accept Challenge</p>
+   {% else %}
+       <h5>Challenge: {{ TrailName }}</h5>
+   {% endif %}
+   
+  </div>
+
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.7.0/mapbox-gl.js"></script>
+  <script type="text/javascript" src="../../static/js/mdb.umd.min.js"></script>
+  <script>
+    let trackingInterval;
+    let challengeStarted = false;
+
+    function startChallenge(event) {
+        event.preventDefault(); // Prevent form submission
+        console.log("Challenge started!"); // Debug message
+
+        // Hide the accept challenge button and form
+        document.getElementById("challenge-form").style.display = "none";
+
+        // Start tracking location
+        startTracking();
+        challengeStarted = true;
+
+        // Display map or trail path info
+        document.getElementById("map").style.display = "block";
+    }
+
+    function startTracking() {
+        console.log("Location tracking started!"); // Debug message
+        // Start location tracking every 10 seconds
+        trackingInterval = setInterval(getLocation, 10000);
+    }
+
+    function stopTracking() {
+        console.log("Location tracking stopped!"); // Debug message
+        clearInterval(trackingInterval);
+    }
+
+    function getLocation() {
+        console.log("Getting location..."); // Debug message
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition, showError);
+        } else {
+            document.getElementById("location").innerHTML = "Geolocation is not supported by this browser.";
+        }
+    }
+
+    function showPosition(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        document.getElementById("location").innerHTML = "Latitude: " + latitude + "<br>Longitude: " + longitude;
+
+        fetch('/updateLocation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ latitude, longitude }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'complete') {
+                alert('Challenge completed!');
+                updatePointsDisplay(data.new_points);
+                stopTracking();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function updatePointsDisplay(newPoints) {
+        document.getElementById("current-points").textContent = "Points: " + newPoints;
+    }
+
+    function showError(error) {
+        let errorMessage = '';
+        switch(error.code) {
+            case error.PERMISSION_DENIED:
+                errorMessage = "User denied the request for Geolocation.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                errorMessage = "Location information is unavailable.";
+                break;
+            case error.TIMEOUT:
+                errorMessage = "The request to get user location timed out.";
+                break;
+            case error.UNKNOWN_ERROR:
+                errorMessage = "An unknown error occurred.";
+                break;
+        }
+        document.getElementById("location").innerHTML = errorMessage;
+    }
+
+    window.onbeforeunload = stopTracking;
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZnJ1Y3RveCIsImEiOiJja2swNnIydzcwZW1mMm5tZmV4Zm44cjVuIn0.AnaNJVv0-oE25uP2-n82QQ';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [153.1159656, -26.7899778],
+        zoom: 15
+    });
+
+    map.on('load', function () {
+        map.addSource('trails', {
+            'type': 'geojson',
+            'data': '/static/trails.geojson' // Adjust path as per your file location
+        });
+        map.addLayer({
+            'id': 'trailsLayer',
+            'type': 'line',
+            'source': 'trails',
+            'layout': {
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-color': ['get', 'color'], // Assumes trails data includes 'color' property
+                'line-width': 3
+            }
+        });
+
+        // Add popup for trail info on click
+        map.on('click', 'trailsLayer', function (e) {
+            var trailName = e.features[0].properties.name;
+            var difficulty = e.features[0].properties.difficulty;
+            new mapboxgl.Popup()
+                .setLngLat(e.lngLat)
+                .setHTML('<strong>' + trailName + '</strong><br>Difficulty: ' + difficulty)
+                .addTo(map);
+        });
+
+        // Change the cursor when hovering over trails
+        map.on('mouseenter', 'trailsLayer', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', 'trailsLayer', function () {
+            map.getCanvas().style.cursor = '';
+        });
+    });
+  </script>
+</body>
+</html>

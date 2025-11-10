@@ -1,0 +1,122 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h5>Welcome, Admin {{ user.email }}</h5>
+<hr>
+
+<div class="row">
+    <!-- Trails Map -->
+    <div class="col-md-8">
+        <div id="map" style="height: 500px;"></div>
+    </div>
+
+    <!-- List of Trails -->
+    <div class="col-md-4">
+        <h4>Trails Panel</h4>
+        <div style="max-height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 10px;">
+            <ul class="list-group">
+                {% for trail in trails %}
+                    <li class="list-group-item">
+                        {{ trail.name }} - {{ trail.status }}
+                        <span class="badge badge-info float-right">{{ trail.difficulty }}</span>
+                        <!-- Dropdown to change status -->
+                        <select class="status-select" data-trail-id="{{ trail.id }}">
+                            <option value="green" {% if trail.status == 'green' %}selected{% endif %}>Good (Green)</option>
+                            <option value="yellow" {% if trail.status == 'yellow' %}selected{% endif %}>Moderate (Yellow)</option>
+                            <option value="red" {% if trail.status == 'red' %}selected{% endif %}>Due for Maintenance (Red)</option>
+                        </select>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZnJ1Y3RveCIsImEiOiJja2swNnIydzcwZW1mMm5tZmV4Zm44cjVuIn0.AnaNJVv0-oE25uP2-n82QQ';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/light-v11',
+        center: [153.1159656, -26.7899778],
+        zoom: 15
+    });
+
+    // Add trail data
+    map.on('load', function () {
+        fetch('/trails/data')
+            .then(response => response.json())
+            .then(data => {
+                map.addSource('trails', {
+                    'type': 'geojson',
+                    'data': data // Load the data from Flask
+                });
+
+                // Add a line layer for the trails
+                map.addLayer({
+                    'id': 'trailsLayer',
+                    'type': 'line',
+                    'source': 'trails',
+                    'layout': {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    'paint': {
+                        'line-color': ['get', 'color'], // Use 'color' property from GeoJSON
+                        'line-width': 3
+                    }
+                });
+
+                // Add popup for trail info on click
+                map.on('click', 'trailsLayer', function (e) {
+                    var trailName = e.features[0].properties.name;
+                    var difficulty = e.features[0].properties.difficulty;
+                    new mapboxgl.Popup()
+                        .setLngLat(e.lngLat)
+                        .setHTML('<strong>' + trailName + '</strong><br>Difficulty: ' + difficulty)
+                        .addTo(map);
+                });
+
+                // Change the cursor when hovering over trails
+                map.on('mouseenter', 'trailsLayer', function () {
+                    map.getCanvas().style.cursor = 'pointer';
+                });
+                map.on('mouseleave', 'trailsLayer', function () {
+                    map.getCanvas().style.cursor = '';
+                });
+            })
+            .catch(error => console.error('Error loading trail data:', error));
+    });
+
+     // Handle status change and refresh page
+     document.querySelectorAll('.status-select').forEach(function(select) {
+        select.addEventListener('change', function() {
+            var trailId = this.getAttribute('data-trail-id');
+            var newStatus = this.value;
+
+            fetch('/update-trail-status', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ id: trailId, status: newStatus })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Trail status updated successfully!');
+                    window.location.reload(); // Refresh the page after update
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating trail status:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+    });
+</script>
+
+{% endblock %}
