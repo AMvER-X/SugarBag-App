@@ -1,6 +1,6 @@
 # SugarBag-App
 🏆 GovHack 2024: Proactive Park Maintenance System
-This application was developed as a continuation of our submission for the 2024 GovHack, Sunshine Coast Challenge, where we placed 2nd. It is centered on revolutionizing park maintenance for Sugar Bag Mountain and Mary Cairncross Scenic Reserve. The core objective was to implement a proactive, data-driven methodology to optimize trail longevity and resource allocation. This was a group project largely developed by myself and another team member. The third focused largely on the data cleaning and analysis.
+This application was developed as a continuation of our submission for the 2024 GovHack, Sunshine Coast Challenge, where we placed 2nd. It is centered on revolutionizing park maintenance for Sugar Bag Mountain and Mary Cairncross Scenic Reserve. The core objective was to implement a proactive, data-driven methodology to optimize trail longevity and resource allocation. This was a group project largely developed by myself and another team member. The third focused largely on the data cleaning and analysis. Lastly the report was done up by our 4th member with the aid of the member in charge of data analysis.
 
 Solution 1: Gamified Trail Management (Focus: Sugar Bag Mountain)
 This solution utilizes gamification and IoT data to manage rider traffic and mitigate wear on mountain bike trails.
